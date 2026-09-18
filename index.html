@@ -142,7 +142,6 @@
         .table-responsive {
             width: 100%;
             overflow-x: auto;
-            max-height: 60vh;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -161,9 +160,24 @@
 
         @media (min-width: 768px) {
             th, td {
-                padding: 6px 8px;
-                font-size: 12px;
+                padding: 8px 5px;
+                font-size: 11px;
             }
+        }
+
+        /* Anchos específicos ajustados y reducidos para las columnas principales */
+        .col-num {
+            width: 32px !important;
+            max-width: 32px !important;
+            min-width: 32px !important;
+        }
+
+        .col-name {
+            width: 220px !important;
+            max-width: 220px !important;
+            min-width: 220px !important;
+            white-space: normal !important;
+            word-break: break-word;
         }
 
         th {
@@ -178,58 +192,48 @@
         tr.fila-mes-superior th {
             background-color: #c7d2fe;
             color: #1e1b4b;
-            font-size: 12px;
+            font-size: 11px;
             border-bottom: 2px solid #818cf8;
         }
 
-        th.col-num, td.col-num {
-            position: sticky;
-            left: 0;
-            background: #ffffff;
-            z-index: 5;
-            width: 28px;
-            min-width: 28px;
-        }
-
-        th.col-name, td.col-name {
-            position: sticky;
-            left: 29px;
-            background: #ffffff;
-            z-index: 5;
-            text-align: left;
-            min-width: 170px;
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .nombre-estudiante-consolidado {
+            text-align: left !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            color: #0f172a !important;
             cursor: pointer;
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
-        @media (min-width: 768px) {
-            th.col-name, td.col-name {
-                min-width: 230px;
-                max-width: 230px;
-            }
-            th.col-num, td.col-num {
-                width: 35px;
-                min-width: 35px;
-            }
-            th.col-name { left: 36px; }
         }
 
-        th.col-name:hover, td.col-name:hover {
+        .nombre-estudiante-consolidado:hover {
             background-color: #e0e7ff !important;
             text-decoration: underline;
         }
 
-        th.col-num { z-index: 15; }
-        th.col-name { z-index: 15; }
+        .nombre-estudiante-detalle {
+            text-align: left !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            color: #0f172a !important;
+            cursor: pointer;
+        }
+        
+        @media (min-width: 768px) {
+            .nombre-estudiante-detalle {
+                font-size: 12px !important;
+            }
+        }
 
-        tr:nth-child(even) td:not(.col-num):not(.col-name) {
+        .nombre-estudiante-detalle:hover {
+            background-color: #e0e7ff !important;
+            text-decoration: underline;
+        }
+
+        tr:nth-child(even) td:not(.col-num):not(.nombre-estudiante-consolidado):not(.nombre-estudiante-detalle) {
             background-color: #f8fafc;
         }
-        tr:nth-child(even) td.col-num, tr:nth-child(even) td.col-name {
+        
+        tr:nth-child(even) td.nombre-estudiante-consolidado,
+        tr:nth-child(even) td.nombre-estudiante-detalle {
             background-color: #fcfcfc;
         }
 
@@ -237,25 +241,17 @@
             background-color: #e2e8f0;
             font-weight: bold;
         }
-        tr.fila-totales td.col-name {
-            background-color: #e2e8f0;
-            text-align: right;
-            color: inherit;
-            cursor: default;
-            text-decoration: none;
-        }
         tr.fila-totales td {
             background-color: #e2e8f0;
         }
 
         input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             cursor: pointer;
             accent-color: var(--primary-color);
         }
 
-        /* Panel de Estadísticas Adaptable */
         .stats-card {
             background: #f8fafc;
             border: 1px solid var(--border-color);
@@ -374,7 +370,7 @@
                 border-radius: 4px;
                 -webkit-print-color-adjust: exact;
             }
-            th, td { border: 1px solid #000 !important; font-size: 9px; padding: 3px; }
+            th, td { border: 1px solid #000 !important; font-size: 8px; padding: 2px; }
             th { background-color: #cbd5e1 !important; -webkit-print-color-adjust: exact; }
             .table-responsive { max-height: none; overflow: visible; }
         }
@@ -398,6 +394,7 @@
                     <option value="4° de Secundaria">4° de Secundaria</option>
                     <option value="5° de Secundaria">5° de Secundaria</option>
                 </select>
+                <button class="btn-success" onclick="abrirRegistroDesdeBotonSuperior()">📋 Ver Registro del Grado</button>
                 <button class="btn-success" onclick="exportarConsolidadoExcel()">Exportar Consolidado a Excel</button>
                 <button class="btn-warning" onclick="abrirEstadisticasGenerales()">Ver Estadísticas (Gráfico)</button>
             </div>
@@ -434,11 +431,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 30px;">N°</th>
-                        <th>Grado</th>
+                        <th class="col-num">N°</th>
+                        <th style="width: 130px;">Grado</th>
                         <th>Apellidos y Nombres del Estudiante</th>
-                        <th>Acción Rápida (Click para Carita Triste 🙁 hoy)</th>
-                        <th>Ver en Registro</th>
+                        <th style="width: 140px;">Acción Rápida</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoConsolidado">
@@ -529,8 +525,8 @@
                         <th class="col-num" rowspan="2">N°</th>
                         <th class="col-name" rowspan="2">Estudiantes</th>
                         <th id="thMesAgrupado" colspan="22">MES</th>
-                        <th style="min-width: 45px;" rowspan="2" title="Total Asistencias">Total</th>
-                        <th style="min-width: 50px; color: #b91c1c;" rowspan="2" title="Total Caritas Tristes">Total 🙁</th>
+                        <th style="min-width: 40px;" rowspan="2" title="Total Asistencias">Total</th>
+                        <th style="min-width: 45px; color: #b91c1c;" rowspan="2" title="Total Caritas Tristes">Total 🙁</th>
                     </tr>
                     <tr id="filaCabeceraDias">
                         <!-- Dinámico -->
@@ -541,7 +537,7 @@
                 </tbody>
                 <tfoot>
                     <tr class="fila-totales" id="filaTotales">
-                        <td class="col-num" colspan="2" style="text-align: right; padding-right: 8px;">TOTAL ASISTENCIAS:</td>
+                        <td class="col-num" colspan="2" style="text-align: right; padding-right: 6px;">TOTAL ASISTENCIAS:</td>
                     </tr>
                 </tfoot>
             </table>
@@ -588,7 +584,7 @@
             "CASTAÑEDA HUAPAYA LUANA GAHELA", "CRISPIN QUISPE ANDRELY SOLEDAD", "CHUMPITAZ ROJAS MARIA ALMENDRA",
             "CHUMPITAZ ROSAS AIME MARLENE", "GARCIA MARCA BLENI YUZELI", "GARCIA ORE THIAGO MATEO",
             "GARCIA VILLALOBOS NISHINJA DEVA", "MEZA QUISPE GENESIS ROSSMERY", "MOYA CASTILLO ANDREA ALEXANDRA",
-            "NARRO ARIAS GREACE DAYANNA", "RAMOS AVALOS YERIK ANYELO YAMIL", "TASAYCO ROJAS ALVARO YHAJAIRO",
+            "NARRO ARIAS GREACE DAYANNA", "RAMOS AVALOS YERIKANYELO YAMIL", "TASAYCO ROJAS ALVARO YHAJAIRO",
             "TOMAS PULIDO ALLISON TATIANA"
         ],
         "5° de Secundaria": [
@@ -645,15 +641,20 @@
             alumnos.forEach(nombre => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="col-num"><b>${contador++}</b></td>
-                    <td><b>${grado}</b></td>
-                    <td class="col-name" onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" title="Clic para agregar carita triste hoy">${nombre}</td>
-                    <td style="text-align: center;"><button onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" class="btn-danger" style="padding: 4px 8px; font-size: 11px;">🙁 Poner Triste</button></td>
-                    <td style="text-align: center;"><button onclick="abrirDetalleGrado('${grado}')" style="padding: 4px 8px; font-size: 11px;">Ver Registro</button></td>
+                    <td class="col-num" style="text-align: center;"><b>${contador++}</b></td>
+                    <td style="text-align: center;"><b>${grado}</b></td>
+                    <td class="nombre-estudiante-consolidado" onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" title="Clic para agregar carita triste hoy">${nombre}</td>
+                    <td style="text-align: center;"><button onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" class="btn-danger" style="padding: 6px 10px; font-size: 11px; width: 100%;">🙁 Poner Triste</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         });
+    }
+
+    function abrirRegistroDesdeBotonSuperior() {
+        const filtroGrado = document.getElementById('selectGradoConsolidado').value;
+        const gradoApertura = filtroGrado === "TODOS" ? "1° de Secundaria" : filtroGrado;
+        abrirDetalleGrado(gradoApertura);
     }
 
     function abrirDetalleGrado(grado) {
@@ -745,7 +746,7 @@
             htmlDias = `<th colspan="1" style="color: #64748b;">No hay días hábiles en este mes</th>`;
         } else {
             diasHabiles.forEach(dia => {
-                htmlDias += `<th style="min-width: 30px;" title="${dia.diaSemana} ${dia.diaNum}">${dia.diaSemana}<br>${dia.diaNum}</th>`;
+                htmlDias += `<th style="min-width: 26px;" title="${dia.diaSemana} ${dia.diaNum}">${dia.diaSemana}<br>${dia.diaNum}</th>`;
             });
         }
         filaCabeceraDias.innerHTML = htmlDias;
@@ -764,7 +765,7 @@
             const tr = document.createElement('tr');
             
             let htmlFila = `<td class="col-num"><b>${index + 1}</b></td>`;
-            htmlFila += `<td class="col-name" onclick="marcarCaritaTristeEnDetalle('${nombre}')" title="Haz clic para poner carita triste 🙁">${nombre}</td>`;
+            htmlFila += `<td class="col-name nombre-estudiante-detalle" onclick="marcarCaritaTristeEnDetalle('${nombre}')" title="Haz clic para poner carita triste 🙁">${nombre}</td>`;
 
             let totalAlumno = 0;
             let totalSadAlumno = 0;
@@ -779,7 +780,7 @@
                 if (esSad) totalSadAlumno++;
 
                 if (esSad) {
-                    htmlFila += `<td data-key="${uniqueKey}" style="font-size: 14px; cursor: pointer;" onclick="ciclarEstado('${uniqueKey}')" title="Carita triste (Haz clic para cambiar)">🙁</td>`;
+                    htmlFila += `<td data-key="${uniqueKey}" style="font-size: 13px; cursor: pointer;" onclick="ciclarEstado('${uniqueKey}')" title="Carita triste (Haz clic para cambiar)">🙁</td>`;
                 } else {
                     htmlFila += `<td><input type="checkbox" data-key="${uniqueKey}" ${estaMarcado ? 'checked' : ''} onchange="actualizarCheck(this)"></td>`;
                 }
@@ -851,7 +852,7 @@
 
     function renderizarTotalesColumnas(diasHabiles, nombresAlumnos) {
         const filaTotales = document.getElementById('filaTotales');
-        let htmlTotales = `<td class="col-num" colspan="2" style="text-align: right; padding-right: 8px; font-weight: bold;">TOTAL ASISTENCIAS:</td>`;
+        let htmlTotales = `<td class="col-num" colspan="2" style="text-align: right; padding-right: 6px; font-weight: bold;">TOTAL ASISTENCIAS:</td>`;
 
         const asistenciasGrado = datosApp[gradoActual].asistencias || {};
 
@@ -1170,9 +1171,9 @@
 
         const ws = XLSX.utils.aoa_to_sheet(dataSheet);
 
-        let wscols = [{ wch: 4 }, { wch: 32 }];
-        diasHabiles.forEach(() => wscols.push({ wch: 4.5 }));
-        wscols.push({ wch: 8 }, { wch: 8 });
+        let wscols = [{ wch: 4 }, { wch: 30 }];
+        diasHabiles.forEach(() => wscols.push({ wch: 4 }));
+        wscols.push({ wch: 6 }, { wch: 6 });
         ws['!cols'] = wscols;
 
         let merges = [
