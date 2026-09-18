@@ -450,7 +450,6 @@
                 <thead>
                     <tr>
                         <th style="width: 1% !important; white-space: nowrap !important;">N°</th>
-                        <th style="width: 1% !important; white-space: nowrap !important;">Grado</th>
                         <th style="width: 1% !important; white-space: nowrap !important;">Apellidos y Nombres del Estudiante</th>
                         <th style="width: 1% !important; white-space: nowrap !important;">Acción Rápida</th>
                     </tr>
@@ -660,7 +659,6 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="width: 1% !important; white-space: nowrap !important; text-align: center;"><b>${contador++}</b></td>
-                    <td style="width: 1% !important; white-space: nowrap !important; text-align: center;"><b>${grado}</b></td>
                     <td class="nombre-estudiante-consolidado" style="width: 1% !important; white-space: nowrap !important;" onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" title="Clic para agregar carita triste hoy">${nombre}</td>
                     <td style="width: 1% !important; white-space: nowrap !important; text-align: center;"><button onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" class="btn-danger" style="padding: 6px 10px; font-size: 11px; width: 100%;">🙁 Poner Triste</button></td>
                 `;
@@ -1034,11 +1032,10 @@
         };
 
         let dataSheet = [
-            [{ v: "CONSOLIDADO GENERAL DE ASISTENCIA - SECUNDARIA", s: titleStyle }, "", ""],
+            [{ v: "CONSOLIDADO GENERAL DE ASISTENCIA - SECUNDARIA", s: titleStyle }, ""],
             [],
             [
                 { v: "N°", s: headerTableStyle },
-                { v: "Grado", s: headerTableStyle },
                 { v: "Apellidos y Nombres del Estudiante", s: headerTableStyle }
             ]
         ];
@@ -1052,15 +1049,14 @@
             alumnos.forEach(nombre => {
                 dataSheet.push([
                     { v: contador++, s: { ...cellStyle, alignment: { horizontal: "center" } } },
-                    { v: grado, s: cellStyle },
                     { v: nombre, s: cellStyle }
                 ]);
             });
         });
 
         const ws = XLSX.utils.aoa_to_sheet(dataSheet);
-        ws['!cols'] = [{ wch: 6 }, { wch: 22 }, { wch: 38 }];
-        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
+        ws['!cols'] = [{ wch: 6 }, { wch: 38 }];
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }];
 
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Consolidado");
