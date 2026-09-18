@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Consolidado de Asistencia y Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            --success-color: #10b981;
+            --success-hover: #059669;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 8px;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
+        }
+
+        .header-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            background: #f1f5f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            align-items: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .header-panel div {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .header-panel label {
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .header-panel select, .header-panel input {
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 12px;
+            background: white;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .actions-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .actions-group {
+                width: auto;
+            }
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: background-color 0.2s;
+            flex: 1;
+        }
+
+        @media (min-width: 768px) {
+            button {
+                flex: unset;
+            }
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-danger { background-color: var(--danger-color); }
+        .btn-danger:hover { background-color: var(--danger-hover); }
+
+        .btn-success { background-color: var(--success-color); }
+        .btn-success:hover { background-color: var(--success-hover); }
+
+        .btn-warning { background-color: #f59e0b; color: white; }
+        .btn-warning:hover { background-color: #d97706; }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            max-height: 60vh;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 6px 4px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        @media (min-width: 768px) {
+            th, td {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+        }
+
+        th {
+            background-color: #e0e7ff;
+            color: #312e81;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr.fila-mes-superior th {
+            background-color: #c7d2fe;
+            color: #1e1b4b;
+            font-size: 12px;
+            border-bottom: 2px solid #818cf8;
+        }
+
+        th.col-num, td.col-num {
+            position: sticky;
+            left: 0;
+            background: #ffffff;
+            z-index: 5;
+            width: 28px;
+            min-width: 28px;
+        }
+
+        th.col-name, td.col-name {
+            position: sticky;
+            left: 29px;
+            background: #ffffff;
+            z-index: 5;
+            text-align: left;
+            min-width: 170px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        @media (min-width: 768px) {
+            th.col-name, td.col-name {
+                min-width: 230px;
+                max-width: 230px;
+            }
+            th.col-num, td.col-num {
+                width: 35px;
+                min-width: 35px;
+            }
+            th.col-name { left: 36px; }
+        }
+
+        th.col-name:hover, td.col-name:hover {
+            background-color: #e0e7ff !important;
+            text-decoration: underline;
+        }
+
+        th.col-num { z-index: 15; }
+        th.col-name { z-index: 15; }
+
+        tr:nth-child(even) td:not(.col-num):not(.col-name) {
+            background-color: #f8fafc;
+        }
+        tr:nth-child(even) td.col-num, tr:nth-child(even) td.col-name {
+            background-color: #fcfcfc;
+        }
+
+        tr.fila-totales {
+            background-color: #e2e8f0;
+            font-weight: bold;
+        }
+        tr.fila-totales td.col-name {
+            background-color: #e2e8f0;
+            text-align: right;
+            color: inherit;
+            cursor: default;
+            text-decoration: none;
+        }
+        tr.fila-totales td {
+            background-color: #e2e8f0;
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--primary-color);
+        }
+
+        /* Panel de Estadísticas Adaptable */
+        .stats-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .stats-card {
+                flex-direction: row;
+                justify-content: space-around;
+                padding: 20px;
+            }
+        }
+
+        .stat-box {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 1px 3px rgb(0 0 0 / 0.05);
+        }
+
+        @media (min-width: 768px) {
+            .stat-box {
+                min-width: 200px;
+                width: auto;
+            }
+        }
+
+        .stat-box h3 { margin: 0 0 8px 0; font-size: 13px; color: #475569; }
+        .stat-box .number { font-size: 22px; font-weight: bold; color: var(--primary-color); }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                width: auto;
+            }
+        }
+
+        .pie-chart {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .legend-color {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+        }
+
+        .print-header { display: none; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 0; max-width: 100%; }
+            .header-panel, .actions-bar { display: none !important; }
+            .print-header {
+                display: block !important;
+                margin-bottom: 10px;
+                border-bottom: 2px solid #334155;
+                padding-bottom: 5px;
+            }
+            .print-header h3 {
+                margin: 0 0 6px 0;
+                text-align: center;
+                color: #1e293b;
+                font-size: 14px;
+                background-color: #e0e7ff;
+                padding: 4px;
+                border-radius: 4px;
+                -webkit-print-color-adjust: exact;
+            }
+            .print-info-grid {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                font-weight: bold;
+                color: #1e293b;
+                background: #f1f5f9;
+                padding: 4px 8px;
+                border-radius: 4px;
+                -webkit-print-color-adjust: exact;
+            }
+            th, td { border: 1px solid #000 !important; font-size: 9px; padding: 3px; }
+            th { background-color: #cbd5e1 !important; -webkit-print-color-adjust: exact; }
+            .table-responsive { max-height: none; overflow: visible; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- VISTA 1: CONSOLIDADO GENERAL -->
+    <div id="vistaConsolidado" class="view-section active">
+        <h2>Consolidado General de Asistencia - Secundaria</h2>
+        
+        <div class="actions-bar">
+            <div class="actions-group">
+                <label for="selectGradoConsolidado" style="font-weight: bold; font-size: 12px; width: 100%;">Filtrar Grado:</label>
+                <select id="selectGradoConsolidado" onchange="renderizarConsolidado()" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); font-weight: 600; font-size: 12px; background: white; width: 100%;">
+                    <option value="TODOS">-- Todos los Grados --</option>
+                    <option value="1° de Secundaria">1° de Secundaria</option>
+                    <option value="2° de Secundaria">2° de Secundaria</option>
+                    <option value="3° de Secundaria">3° de Secundaria</option>
+                    <option value="4° de Secundaria">4° de Secundaria</option>
+                    <option value="5° de Secundaria">5° de Secundaria</option>
+                </select>
+                <button class="btn-success" onclick="exportarConsolidadoExcel()">Exportar Consolidado a Excel</button>
+                <button class="btn-warning" onclick="abrirEstadisticasGenerales()">Ver Estadísticas (Gráfico)</button>
+            </div>
+            <div class="actions-group" style="margin-top: 4px;">
+                <button onclick="exportarJSON()">Exportar (JSON)</button>
+                <button onclick="document.getElementById('inputImportJson').click()">Importar (JSON)</button>
+                <input type="file" id="inputImportJson" accept=".json" style="display: none;" onchange="importarJSON(event)">
+            </div>
+        </div>
+
+        <!-- Panel de Estadísticas Generales -->
+        <div id="panelEstadisticas" style="display: none;" class="stats-card">
+            <div class="stat-box">
+                <h3>Total Estudiantes Registrados</h3>
+                <div class="number" id="statTotalAlumnos">0</div>
+            </div>
+            <div class="stat-box">
+                <h3>Total Marcaron Triste (🙁) Global</h3>
+                <div class="number" id="statTotalTristes" style="color: var(--danger-color);">0</div>
+            </div>
+            <div class="chart-container">
+                <div class="pie-chart" id="pieChartGeneral"></div>
+                <div class="chart-legend">
+                    <div class="legend-item"><div class="legend-color" style="background: var(--success-color);"></div>Asistencias</div>
+                    <div class="legend-item"><div class="legend-color" style="background: var(--danger-color);"></div>Inasistencias/Tristes</div>
+                </div>
+            </div>
+            <div style="width: 100%;">
+                <button onclick="cerrarEstadisticasGenerales()" style="width: 100%;">Cerrar Estadísticas</button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 30px;">N°</th>
+                        <th>Grado</th>
+                        <th>Apellidos y Nombres del Estudiante</th>
+                        <th>Acción Rápida (Click para Carita Triste 🙁 hoy)</th>
+                        <th>Ver en Registro</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoConsolidado">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- VISTA 2: REGISTRO DETALLADO POR GRADO -->
+    <div id="vistaDetalle" class="view-section">
+        <div style="margin-bottom: 10px;">
+            <button onclick="volverAlConsolidado()" style="width: 100%;">⬅ Volver al Consolidado</button>
+        </div>
+
+        <h2>Registro Mensual Compacto de Asistencia - Secundaria</h2>
+
+        <!-- Panel Superior -->
+        <div class="header-panel">
+            <div>
+                <label for="selectGrado">Grado:</label>
+                <select id="selectGrado" onchange="cambiarGrado()">
+                    <option value="1° de Secundaria">1° de Secundaria</option>
+                    <option value="2° de Secundaria">2° de Secundaria</option>
+                    <option value="3° de Secundaria">3° de Secundaria</option>
+                    <option value="4° de Secundaria">4° de Secundaria</option>
+                    <option value="5° de Secundaria">5° de Secundaria</option>
+                </select>
+            </div>
+            <div>
+                <label for="selectBimestre">Bimestre:</label>
+                <select id="selectBimestre" onchange="guardarEstadoConfig()">
+                    <option value="I Bimestre">I Bimestre</option>
+                    <option value="II Bimestre">II Bimestre</option>
+                    <option value="III Bimestre">III Bimestre</option>
+                    <option value="IV Bimestre">IV Bimestre</option>
+                </select>
+            </div>
+            <div>
+                <label for="selectMes">Mes:</label>
+                <select id="selectMes" onchange="actualizarMesCalendario()">
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+            <div>
+                <label for="inputDocente">Docente Responsable:</label>
+                <input type="text" id="inputDocente" placeholder="Escriba el nombre..." oninput="guardarEstadoConfig()">
+            </div>
+        </div>
+
+        <!-- Encabezado para impresión -->
+        <div class="print-header">
+            <h3>REGISTRO MENSUAL DE ASISTENCIA Y CONTROL - SECUNDARIA</h3>
+            <div class="print-info-grid">
+                <span id="printGrado">Grado: </span>
+                <span id="printBimestre">Bimestre: </span>
+                <span id="printMes">Mes: </span>
+                <span id="printDocente">Docente: </span>
+            </div>
+        </div>
+
+        <!-- Barra de Botones -->
+        <div class="actions-bar">
+            <div class="actions-group">
+                <button class="btn-success" onclick="guardarTodo()">Guardar Todo</button>
+                <button onclick="prepararImpresion()">Imprimir</button>
+                <button class="btn-success" onclick="exportarExcel()">Exportar a Excel</button>
+            </div>
+            <div class="actions-group" style="margin-top: 4px;">
+                <button class="btn-danger" onclick="reiniciarDatos()" style="width: 100%;">Reiniciar Datos</button>
+            </div>
+        </div>
+
+        <!-- Tabla Mensual Dinámica Compacta -->
+        <div class="table-responsive">
+            <table id="tablaAsistencia">
+                <thead>
+                    <tr id="filaMesSuperior" class="fila-mes-superior">
+                        <th class="col-num" rowspan="2">N°</th>
+                        <th class="col-name" rowspan="2">Estudiantes</th>
+                        <th id="thMesAgrupado" colspan="22">MES</th>
+                        <th style="min-width: 45px;" rowspan="2" title="Total Asistencias">Total</th>
+                        <th style="min-width: 50px; color: #b91c1c;" rowspan="2" title="Total Caritas Tristes">Total 🙁</th>
+                    </tr>
+                    <tr id="filaCabeceraDias">
+                        <!-- Dinámico -->
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <!-- Dinámico -->
+                </tbody>
+                <tfoot>
+                    <tr class="fila-totales" id="filaTotales">
+                        <td class="col-num" colspan="2" style="text-align: right; padding-right: 8px;">TOTAL ASISTENCIAS:</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const listadoInicialNombres = {
+        "1° de Secundaria": [
+            "ABURTO PEREZ NARDA V.", "ABURTO ZAMUDIO ANA TALIA", "AVALOS HERRERA THIAGO",
+            "AVALOS CHUMPITAZ ZOE THAIS", "CHUMPITAZ BALTAZAR KIARA", "CRISPIN QUISPE DAYRO",
+            "FLORES SAAVEDRA ALEJANDRA", "GARCIA FERNANDEZ BANDES WILLIAM", "MALASQUEZ CHUMPITAZ ANGEL",
+            "MALASQUEZ CHUMPITAZ ROXETTE", "MALASQUEZ LOZANO ANAHI", "MALASQUEZ VILLALOBOS KAZUMI",
+            "OCHOA QUISPE ARELIZ AIXA", "PIGUAY VASQUEZ LUIS GERARD", "PIZANGO FLORES SELVIA",
+            "RAMOS CAMPOS XIARA", "SILOPU ARCOS FREDY", "SILVA MONTILLA YOSGUER",
+            "VILLALOBOS QUISPE LUIS", "VILLALOBOS CAMACHO JEAN CARLOS", "ZAMUDIO AVALOS MARIA",
+            "SALAZAR NEYRA JAIRO"
+        ],
+        "2° de Secundaria": [
+            "ABURTO ZAVALA NAIRA MAITE", "ACUÑA QUISPE ALICIA NICOLE", "AGUILAR NEYRA ESEFANI ABIGAIL",
+            "ARCOS EGUSQUIZA LEONARDO EZEQUIEL", "ARIAS LIMA ALESSIA BRIANA", "ARIAS SALINAS KAHORI MARLENY",
+            "ARIAS VILLALOBOS JEAN POOL", "AVALOS ARIAS JOSE MARIA", "BENAVENTE MALASQUEZ ISAAC EDUARDO",
+            "CANDELA CASTILLO ESTEBAN", "CANDELA PEREZ JASUE", "CASILLA ARCOS KAORY KATSUMY",
+            "CHUMPITAZ ROSAS VALESKA ELIZABETH", "DIAZ ARIAS AGELI", "FLORES SAAVEDRA FABIANA YACET",
+            "LARA PAREDES ROSA FERNANADA", "MENDIGUETE ACUÑA FRANCO NICOLAS", "MEZA CHUMPITAZ DAYANA BEATRIZ",
+            "QUISPE FRANCIA LUISA MARIA", "RODRIGUEZ ABURTO MARIA GUADALUPE", "VILLALOBOS ARIAS OSSTIN JOSUE",
+            "ZAPATA HERRERA BYRON", "SALAZAR NEIRA ANI", "ESPINO MENDOZA NAHUM JHOKADY",
+            "GARCIA ARIAS JIMENA"
+        ],
+        "3° de Secundaria": [
+            "ALLANTA QUIROZ THAMARA LUCIA", "AVALOS ORBE SARAI KARUMI", "AVALOS VASQUEZ JUAN JOSE",
+            "CAMPOS MERCADO KATHERINE NICOL", "CARBAJAL RIVERA EDGAR GEORGE GABRIEL", "CASTELL TENEMAS NAYLIN YAMIL",
+            "CHOZ CISNEROS JUAN ANDRES", "CHUMPITAZ CERRON HARUMI XIOMARA", "DAVILA VARGAS JHELEN NAOMI",
+            "ESQUEN MEJIA DARREL ANDRE", "FRANCIA HERNANDEZ EDISON JOSEMARIA", "GARCIA MALASQUEZ TAYRA ANGELY",
+            "LEON CHUMPITAZ DYLAN MANUEL ANDRES", "MALASQUEZ ABURTO JHEFREE GONZALO", "PIGUAY DOMINGUEZ MARIA DE LOS ANGELES",
+            "RAMOS ANGULO KRIZIA ZAGHENY MARCELA", "RENGIFO QUISPE MONICA KAORI", "SANCHEZ CAMPOS DREY ABDUL",
+            "SAUREZ SANCHEZ BRUCE WILLIANS", "VILLALOBOS CAMACHO GUADALUPE", "VILLALOBOS SAIRE SITA TAKURANI",
+            "VILLALOBOS VILLALOBOS PARVATI DEVI", "MALASQUEZ PARIONA ROSA MARIA"
+        ],
+        "4° de Secundaria": [
+            "ABURTO GUZMAN LUHANA KAHORI", "ARIAS ACUÑA JOSIANA MARIA V.", "ARIAS QUISPE JOSE GONZALO",
+            "ARIAS RAMOS ROBERTO FRANCISCO", "ARQUIÑEVA AVALOS MELANY REBECA", "AVALOS SANCHEZ MARIA ELITIA NAOMI",
+            "CASTAÑEDA HUAPAYA LUANA GAHELA", "CRISPIN QUISPE ANDRELY SOLEDAD", "CHUMPITAZ ROJAS MARIA ALMENDRA",
+            "CHUMPITAZ ROSAS AIME MARLENE", "GARCIA MARCA BLENI YUZELI", "GARCIA ORE THIAGO MATEO",
+            "GARCIA VILLALOBOS NISHINJA DEVA", "MEZA QUISPE GENESIS ROSSMERY", "MOYA CASTILLO ANDREA ALEXANDRA",
+            "NARRO ARIAS GREACE DAYANNA", "RAMOS AVALOS YERIK ANYELO YAMIL", "TASAYCO ROJAS ALVARO YHAJAIRO",
+            "TOMAS PULIDO ALLISON TATIANA"
+        ],
+        "5° de Secundaria": [
+            "ABURTO PEREZ YASMIN GABRIELA", "ALIAGA MANIHUARI LEONARDO DAVID", "ANGELES CHUMPITAZ CHERLIT FIORELLA",
+            "ARANA VILCA MARIA PALOMA", "ARIAS CAMPOS FABIAN ALEXANDER", "ARIAS LIMA AXEL FRANCISCO",
+            "ARIAS VILLALOBOS YASURI", "AVALOS AVALOS LUHANA BELEN", "AVALOS QUISPE VICTOR ALONSO SAMIR",
+            "CAMPOS AQUINO ABIGAIL GUADALUPE", "CAMPOS BARTOLO DANY DANIEL", "CAMPOS NAPAN LUZ ANDREA",
+            "CAMPOS SOLER KATSUMI SAHORI", "CAMPOS YAYA DENNISE YOELI", "CANDELA CHAVEZ STEPHANO DENILSON",
+            "CANDELA PACHECO DAYANA ANTUANET", "CASTILLO CAMPOS ROSA RUBI RINA", "DAVILA ZAVALA CELESTE ADRIANA",
+            "GARCIA MALASQUEZ ALESSIA ISABEL", "GARCIA MALASQUEZ FERGIE ESMERALDA", "GARCIA VILLALOBOS VRNDA DEVI",
+            "PAZ BERRU NEYSER YOEL", "PELAEZ AVALOS MARJORIE ESPERANZA", "QUIQUIA VAZQUEZ YASUMI XIOMARA",
+            "RODRIGUEZ ANGULO JIORDANA R.", "ROJAS MEDINA ARIADNA IVANA", "SANCHEZ ROSAS JUAN PABLO",
+            "SILOPU ARCOS MARIA DEL CARMEN", "SUAREZ ARCOS AYTANA MARIA M.", "SUAREZ SANCHEZ DEYVID DAVID",
+            "RODRIGUEZ ATENCIO CRISTIAN JAIR"
+        ]
+    };
+
+    const nombresMeses = {
+        "3": "Marzo", "4": "Abril", "5": "Mayo", "6": "Junio", "7": "Julio",
+        "8": "Agosto", "9": "Setiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
+    };
+
+    let datosApp = JSON.parse(localStorage.getItem('sistema_consolidado_asistencia_db')) || {};
+
+    let gradoActual = "1° de Secundaria";
+    let mesActual = "9"; 
+
+    const mesHoy = new Date().getMonth() + 1;
+    if (mesHoy >= 3 && mesHoy <= 12) {
+        mesActual = mesHoy.toString();
+        document.getElementById('selectMes').value = mesActual;
+    }
+
+    function inicializarDatosGrado(grado) {
+        if (!datosApp[grado]) {
+            datosApp[grado] = {
+                docente: "",
+                bimestre: "I Bimestre",
+                asistencias: {} 
+            };
+        }
+    }
+
+    function renderizarConsolidado() {
+        const tbody = document.getElementById('cuerpoConsolidado');
+        tbody.innerHTML = '';
+        let contador = 1;
+
+        const filtroGrado = document.getElementById('selectGradoConsolidado').value;
+        const gradosAProcesar = filtroGrado === "TODOS" ? Object.keys(listadoInicialNombres) : [filtroGrado];
+
+        gradosAProcesar.forEach(grado => {
+            const alumnos = listadoInicialNombres[grado];
+            alumnos.forEach(nombre => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col-num"><b>${contador++}</b></td>
+                    <td><b>${grado}</b></td>
+                    <td class="col-name" onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" title="Clic para agregar carita triste hoy">${nombre}</td>
+                    <td style="text-align: center;"><button onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" class="btn-danger" style="padding: 4px 8px; font-size: 11px;">🙁 Poner Triste</button></td>
+                    <td style="text-align: center;"><button onclick="abrirDetalleGrado('${grado}')" style="padding: 4px 8px; font-size: 11px;">Ver Registro</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+    }
+
+    function abrirDetalleGrado(grado) {
+        gradoActual = grado;
+        document.getElementById('selectGrado').value = grado;
+        inicializarDatosGrado(gradoActual);
+        document.getElementById('inputDocente').value = datosApp[gradoActual].docente || "";
+        document.getElementById('selectBimestre').value = datosApp[gradoActual].bimestre || "I Bimestre";
+        
+        document.getElementById('vistaConsolidado').classList.remove('active');
+        document.getElementById('vistaDetalle').classList.add('active');
+        renderizarTablaMensual();
+    }
+
+    function volverAlConsolidado() {
+        document.getElementById('vistaDetalle').classList.remove('active');
+        document.getElementById('vistaConsolidado').classList.add('active');
+        renderizarConsolidado();
+    }
+
+    function marcarCaritaTristeDesdeConsolidado(grado, nombre) {
+        inicializarDatosGrado(grado);
+        const diaHoyNum = new Date().getDate();
+        const uniqueKey = `${mesActual}-${diaHoyNum}_${nombre}`;
+        
+        if (!datosApp[grado].asistencias) {
+            datosApp[grado].asistencias = {};
+        }
+        datosApp[grado].asistencias[uniqueKey] = 'sad';
+        guardarAlmacenamientoLocal();
+        alert(`Se marcó una carita triste (🙁) para ${nombre} (${grado}) en la fecha de hoy.`);
+    }
+
+    function cambiarGrado() {
+        gradoActual = document.getElementById('selectGrado').value;
+        inicializarDatosGrado(gradoActual);
+        document.getElementById('inputDocente').value = datosApp[gradoActual].docente || "";
+        document.getElementById('selectBimestre').value = datosApp[gradoActual].bimestre || "I Bimestre";
+        renderizarTablaMensual();
+    }
+
+    function guardarEstadoConfig() {
+        inicializarDatosGrado(gradoActual);
+        datosApp[gradoActual].docente = document.getElementById('inputDocente').value;
+        datosApp[gradoActual].bimestre = document.getElementById('selectBimestre').value;
+        guardarAlmacenamientoLocal();
+    }
+
+    function actualizarMesCalendario() {
+        mesActual = document.getElementById('selectMes').value;
+        renderizarTablaMensual();
+    }
+
+    function obtenerDiasHabilesMes(mesStr) {
+        const mes = parseInt(mesStr) - 1;
+        const anio = new Date().getFullYear();
+        const dias = [];
+        const nombresDiasSemana = ['D', 'L', 'M', 'Mi', 'J', 'V', 'S'];
+
+        const date = new Date(anio, mes, 1);
+        while (date.getMonth() === mes) {
+            const dayOfWeek = date.getDay();
+            if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+                dias.push({
+                    diaNum: date.getDate(),
+                    diaSemana: nombresDiasSemana[dayOfWeek],
+                    key: `${mesStr}-${date.getDate()}`
+                });
+            }
+            date.setDate(date.getDate() + 1);
+        }
+        return dias;
+    }
+
+    function renderizarTablaMensual() {
+        inicializarDatosGrado(gradoActual);
+        const nombresAlumnos = listadoInicialNombres[gradoActual] || [];
+        const diasHabiles = obtenerDiasHabilesMes(mesActual);
+        const nombreMesTexto = nombresMeses[mesActual];
+
+        const thMesAgrupado = document.getElementById('thMesAgrupado');
+        thMesAgrupado.colSpan = diasHabiles.length > 0 ? diasHabiles.length : 1;
+        thMesAgrupado.textContent = `MES DE ${nombreMesTexto.toUpperCase()} (LUNES A VIERNES)`;
+
+        const filaCabeceraDias = document.getElementById('filaCabeceraDias');
+        let htmlDias = "";
+        
+        if (diasHabiles.length === 0) {
+            htmlDias = `<th colspan="1" style="color: #64748b;">No hay días hábiles en este mes</th>`;
+        } else {
+            diasHabiles.forEach(dia => {
+                htmlDias += `<th style="min-width: 30px;" title="${dia.diaSemana} ${dia.diaNum}">${dia.diaSemana}<br>${dia.diaNum}</th>`;
+            });
+        }
+        filaCabeceraDias.innerHTML = htmlDias;
+
+        const cuerpoTabla = document.getElementById('cuerpoTabla');
+        cuerpoTabla.innerHTML = '';
+
+        if (nombresAlumnos.length === 0) {
+            cuerpoTabla.innerHTML = `<tr><td colspan="${diasHabiles.length + 4}" style="text-align: center; padding: 20px; color: #64748b;">No hay estudiantes registrados.</td></tr>`;
+            return;
+        }
+
+        const asistenciasGrado = datosApp[gradoActual].asistencias || {};
+
+        nombresAlumnos.forEach((nombre, index) => {
+            const tr = document.createElement('tr');
+            
+            let htmlFila = `<td class="col-num"><b>${index + 1}</b></td>`;
+            htmlFila += `<td class="col-name" onclick="marcarCaritaTristeEnDetalle('${nombre}')" title="Haz clic para poner carita triste 🙁">${nombre}</td>`;
+
+            let totalAlumno = 0;
+            let totalSadAlumno = 0;
+
+            diasHabiles.forEach(dia => {
+                const uniqueKey = `${dia.key}_${nombre}`;
+                const estado = asistenciasGrado[uniqueKey];
+                const estaMarcado = estado === undefined || estado === true;
+                const esSad = estado === 'sad';
+
+                if (estaMarcado) totalAlumno++;
+                if (esSad) totalSadAlumno++;
+
+                if (esSad) {
+                    htmlFila += `<td data-key="${uniqueKey}" style="font-size: 14px; cursor: pointer;" onclick="ciclarEstado('${uniqueKey}')" title="Carita triste (Haz clic para cambiar)">🙁</td>`;
+                } else {
+                    htmlFila += `<td><input type="checkbox" data-key="${uniqueKey}" ${estaMarcado ? 'checked' : ''} onchange="actualizarCheck(this)"></td>`;
+                }
+            });
+
+            htmlFila += `<td class="col-total-fila" style="font-weight: bold; background-color: #f1f5f9;">${totalAlumno}</td>`;
+            htmlFila += `<td class="col-sad-fila" style="font-weight: bold; background-color: #fee2e2; color: #b91c1c;">${totalSadAlumno}</td>`;
+            
+            tr.innerHTML = htmlFila;
+            cuerpoTabla.appendChild(tr);
+        });
+
+        renderizarTotalesColumnas(diasHabiles, nombresAlumnos);
+    }
+
+    function actualizarCheck(checkbox) {
+        const key = checkbox.getAttribute('data-key');
+        inicializarDatosGrado(gradoActual);
+        if (!datosApp[gradoActual].asistencias) {
+            datosApp[gradoActual].asistencias = {};
+        }
+        datosApp[gradoActual].asistencias[key] = checkbox.checked;
+
+        recalcularFilaYTotales(checkbox.closest('tr'));
+    }
+
+    function marcarCaritaTristeEnDetalle(nombre) {
+        const diasHabiles = obtenerDiasHabilesMes(mesActual);
+        if (diasHabiles.length === 0) return;
+
+        const diaHoyNum = new Date().getDate();
+        let diaSeleccionado = diasHabiles[0];
+        const encontrado = diasHabiles.find(d => d.diaNum === diaHoyNum);
+        if (encontrado) {
+            diaSeleccionado = encontrado;
+        }
+
+        const uniqueKey = `${diaSeleccionado.key}_${nombre}`;
+        inicializarDatosGrado(gradoActual);
+        if (!datosApp[gradoActual].asistencias) {
+            datosApp[gradoActual].asistencias = {};
+        }
+        
+        datosApp[gradoActual].asistencias[uniqueKey] = 'sad';
+        guardarAlmacenamientoLocal();
+        renderizarTablaMensual();
+    }
+
+    function ciclarEstado(key) {
+        inicializarDatosGrado(gradoActual);
+        datosApp[gradoActual].asistencias[key] = false;
+        guardarAlmacenamientoLocal();
+        renderizarTablaMensual();
+    }
+
+    function recalcularFilaYTotales(row) {
+        const nombresAlumnos = listadoInicialNombres[gradoActual] || [];
+        const diasHabiles = obtenerDiasHabilesMes(mesActual);
+        
+        const checkboxesFila = row.querySelectorAll('input[type="checkbox"]');
+        let sumaFila = 0;
+        checkboxesFila.forEach(cb => { if(cb.checked) sumaFila++; });
+        
+        row.children[row.children.length - 2].textContent = sumaFila;
+
+        renderizarTotalesColumnas(diasHabiles, nombresAlumnos);
+        guardarAlmacenamientoLocal();
+    }
+
+    function renderizarTotalesColumnas(diasHabiles, nombresAlumnos) {
+        const filaTotales = document.getElementById('filaTotales');
+        let htmlTotales = `<td class="col-num" colspan="2" style="text-align: right; padding-right: 8px; font-weight: bold;">TOTAL ASISTENCIAS:</td>`;
+
+        const asistenciasGrado = datosApp[gradoActual].asistencias || {};
+
+        diasHabiles.forEach(dia => {
+            let totalDia = 0;
+            nombresAlumnos.forEach(nombre => {
+                const uniqueKey = `${dia.key}_${nombre}`;
+                const estado = asistenciasGrado[uniqueKey];
+                const estaMarcado = estado === undefined || estado === true;
+                if (estaMarcado) {
+                    totalDia++;
+                }
+            });
+            htmlTotales += `<td style="font-weight: bold;">${totalDia}</td>`;
+        });
+
+        let totalGeneralMes = 0;
+        let totalGeneralSad = 0;
+
+        nombresAlumnos.forEach(nombre => {
+            diasHabiles.forEach(dia => {
+                const uniqueKey = `${dia.key}_${nombre}`;
+                const estado = asistenciasGrado[uniqueKey];
+                const estaMarcado = estado === undefined || estado === true;
+                if (estaMarcado) totalGeneralMes++;
+                if (estado === 'sad') totalGeneralSad++;
+            });
+        });
+
+        htmlTotales += `<td style="font-weight: bold; background-color: #cbd5e1;">${totalGeneralMes}</td>`;
+        htmlTotales += `<td style="font-weight: bold; background-color: #fca5a5; color: #7f1d1d;">${totalGeneralSad}</td>`;
+
+        filaTotales.innerHTML = htmlTotales;
+    }
+
+    function guardarAlmacenamientoLocal() {
+        localStorage.setItem('sistema_consolidado_asistencia_db', JSON.stringify(datosApp));
+    }
+
+    function guardarTodo() {
+        guardarEstadoConfig();
+        alert("¡Todos los datos de asistencia han sido guardados correctamente!");
+    }
+
+    function reiniciarDatos() {
+        if(confirm("¿Estás seguro de restablecer todos los registros de asistencia?")) {
+            localStorage.removeItem('sistema_consolidado_asistencia_db');
+            datosApp = {};
+            inicializarDatosGrado(gradoActual);
+            renderizarTablaMensual();
+            alert("Aplicativo reiniciado.");
+        }
+    }
+
+    function abrirEstadisticasGenerales() {
+        let totalAlumnosCount = 0;
+        let totalTristesCount = 0;
+        let totalAsistenciasCount = 0;
+        let totalPosiblesCount = 0;
+
+        const diasHabilesMesActual = obtenerDiasHabilesMes(mesActual);
+
+        Object.keys(listadoInicialNombres).forEach(grado => {
+            const alumnos = listadoInicialNombres[grado];
+            totalAlumnosCount += alumnos.length;
+            const asistenciasGrado = datosApp[grado]?.asistencias || {};
+
+            alumnos.forEach(nombre => {
+                diasHabilesMesActual.forEach(dia => {
+                    const uniqueKey = `${dia.key}_${nombre}`;
+                    const estado = asistenciasGrado[uniqueKey];
+                    totalPosiblesCount++;
+                    if (estado === undefined || estado === true) {
+                        totalAsistenciasCount++;
+                    } else if (estado === 'sad') {
+                        totalTristesCount++;
+                    }
+                });
+            });
+        });
+
+        document.getElementById('statTotalAlumnos').textContent = totalAlumnosCount;
+        document.getElementById('statTotalTristes').textContent = totalTristesCount;
+
+        const porcTristes = totalPosiblesCount > 0 ? (totalTristesCount / totalPosiblesCount) * 100 : 0;
+        const porcAsistencias = 100 - porcTristes;
+
+        const pieChart = document.getElementById('pieChartGeneral');
+        pieChart.style.background = `conic-gradient(#10b981 0% ${porcAsistencias}%, #ef4444 ${porcAsistencias}% 100%)`;
+
+        document.getElementById('panelEstadisticas').style.display = 'flex';
+    }
+
+    function cerrarEstadisticasGenerales() {
+        document.getElementById('panelEstadisticas').style.display = 'none';
+    }
+
+    function prepararImpresion() {
+        const selectMesText = document.getElementById('selectMes');
+        document.getElementById('printGrado').textContent = "Grado: " + gradoActual;
+        document.getElementById('printBimestre').textContent = "Bimestre: " + document.getElementById('selectBimestre').value;
+        document.getElementById('printMes').textContent = "Mes: " + selectMesText.options[selectMesText.selectedIndex].text;
+        document.getElementById('printDocente').textContent = "Docente: " + (document.getElementById('inputDocente').value || "No especificado");
+
+        window.print();
+    }
+
+    function exportarJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datosApp, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `sistema_consolidado_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function importarJSON(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                datosApp = JSON.parse(e.target.result);
+                guardarAlmacenamientoLocal();
+                renderizarConsolidado();
+                alert("¡Datos importados exitosamente!");
+            } catch (err) {
+                alert("Error al leer el archivo JSON: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function exportarConsolidadoExcel() {
+        const borderStyle = {
+            top: { style: "thin", color: { rgb: "cbd5e1" } },
+            bottom: { style: "thin", color: { rgb: "cbd5e1" } },
+            left: { style: "thin", color: { rgb: "cbd5e1" } },
+            right: { style: "thin", color: { rgb: "cbd5e1" } }
+        };
+
+        const titleStyle = {
+            font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "4F46E5" } },
+            alignment: { horizontal: "center", vertical: "center" }
+        };
+
+        const headerTableStyle = {
+            font: { bold: true, color: { rgb: "312E81" } },
+            fill: { fgColor: { rgb: "E0E7FF" } },
+            alignment: { horizontal: "center", vertical: "center" },
+            border: borderStyle
+        };
+
+        const cellStyle = {
+            font: { color: { rgb: "1E293B" } },
+            border: borderStyle,
+            alignment: { vertical: "center" }
+        };
+
+        let dataSheet = [
+            [{ v: "CONSOLIDADO GENERAL DE ASISTENCIA - SECUNDARIA", s: titleStyle }, "", ""],
+            [],
+            [
+                { v: "N°", s: headerTableStyle },
+                { v: "Grado", s: headerTableStyle },
+                { v: "Apellidos y Nombres del Estudiante", s: headerTableStyle }
+            ]
+        ];
+
+        let contador = 1;
+        const filtroGrado = document.getElementById('selectGradoConsolidado').value;
+        const gradosAProcesar = filtroGrado === "TODOS" ? Object.keys(listadoInicialNombres) : [filtroGrado];
+
+        gradosAProcesar.forEach(grado => {
+            const alumnos = listadoInicialNombres[grado];
+            alumnos.forEach(nombre => {
+                dataSheet.push([
+                    { v: contador++, s: { ...cellStyle, alignment: { horizontal: "center" } } },
+                    { v: grado, s: cellStyle },
+                    { v: nombre, s: cellStyle }
+                ]);
+            });
+        });
+
+        const ws = XLSX.utils.aoa_to_sheet(dataSheet);
+        ws['!cols'] = [{ wch: 6 }, { wch: 22 }, { wch: 38 }];
+        ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 2 } }];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Consolidado");
+        XLSX.writeFile(wb, `Consolidado_General_Asistencia.xlsx`);
+    }
+
+    function exportarExcel() {
+        const selectMesEl = document.getElementById('selectMes');
+        const nombreMes = selectMesEl.options[selectMesEl.selectedIndex].text;
+        const bimestreVal = document.getElementById('selectBimestre').value;
+        const docenteVal = document.getElementById('inputDocente').value || "No especificado";
+
+        const nombresAlumnos = listadoInicialNombres[gradoActual] || [];
+        const diasHabiles = obtenerDiasHabilesMes(mesActual);
+        const asistenciasGrado = datosApp[gradoActual].asistencias || {};
+
+        const borderStyle = {
+            top: { style: "thin", color: { rgb: "cbd5e1" } },
+            bottom: { style: "thin", color: { rgb: "cbd5e1" } },
+            left: { style: "thin", color: { rgb: "cbd5e1" } },
+            right: { style: "thin", color: { rgb: "cbd5e1" } }
+        };
+
+        const titleStyle = {
+            font: { bold: true, sz: 14, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "4F46E5" } },
+            alignment: { horizontal: "center", vertical: "center" }
+        };
+
+        const infoStyle = {
+            font: { bold: true, color: { rgb: "1E293B" } },
+            fill: { fgColor: { rgb: "F1F5F9" } },
+            border: borderStyle
+        };
+
+        const groupHeaderStyle = {
+            font: { bold: true, color: { rgb: "1E1B4B" } },
+            fill: { fgColor: { rgb: "C7D2FE" } },
+            alignment: { horizontal: "center", vertical: "center" },
+            border: borderStyle
+        };
+
+        const headerTableStyle = {
+            font: { bold: true, color: { rgb: "312E81" } },
+            fill: { fgColor: { rgb: "E0E7FF" } },
+            alignment: { horizontal: "center", vertical: "center" },
+            border: borderStyle
+        };
+
+        const cellStyle = {
+            font: { color: { rgb: "1E293B" } },
+            border: borderStyle,
+            alignment: { vertical: "center" }
+        };
+
+        let rowMesHeader = [
+            { v: "N°", s: groupHeaderStyle },
+            { v: "Estudiantes", s: groupHeaderStyle }
+        ];
+        diasHabiles.forEach(() => rowMesHeader.push({ v: `MES DE ${nombreMes.toUpperCase()} (LUNES A VIERNES)`, s: groupHeaderStyle }));
+        rowMesHeader.push({ v: "Total", s: groupHeaderStyle }, { v: "Total 🙁", s: groupHeaderStyle });
+
+        let headerRowDias = ["N°", "Estudiantes"];
+        diasHabiles.forEach(d => headerRowDias.push(`${d.diaSemana} ${d.diaNum}`));
+        headerRowDias.push("Total", "Total 🙁");
+
+        const dataSheet = [
+            [{ v: "SISTEMA INTEGRADO DE ASISTENCIA - SECUNDARIA", s: titleStyle }, ...Array(headerRowDias.length - 1).fill("")],
+            [{ v: "Grado:", s: infoStyle }, { v: gradoActual, s: infoStyle }, ...Array(headerRowDias.length - 2).fill("")],
+            [{ v: "Bimestre:", s: infoStyle }, { v: bimestreVal, s: infoStyle }, ...Array(headerRowDias.length - 2).fill("")],
+            [{ v: "Mes:", s: infoStyle }, { v: nombreMes, s: infoStyle }, ...Array(headerRowDias.length - 2).fill("")],
+            [{ v: "Docente:", s: infoStyle }, { v: docenteVal, s: infoStyle }, ...Array(headerRowDias.length - 2).fill("")],
+            [],
+            rowMesHeader,
+            headerRowDias.map(h => ({ v: h, s: headerTableStyle }))
+        ];
+
+        let totalesColumnas = Array(diasHabiles.length).fill(0);
+        let granTotalMes = 0;
+        let granTotalSad = 0;
+
+        nombresAlumnos.forEach((nombre, index) => {
+            let fila = [
+                { v: index + 1, s: { ...cellStyle, alignment: { horizontal: "center" } } },
+                { v: nombre, s: cellStyle }
+            ];
+
+            let totalAlumno = 0;
+            let totalSadAlumno = 0;
+
+            diasHabiles.forEach((dia, dIdx) => {
+                const uniqueKey = `${dia.key}_${nombre}`;
+                const estado = asistenciasGrado[uniqueKey];
+                const marcado = estado === undefined || estado === true;
+                const esSad = estado === 'sad';
+
+                if (marcado) {
+                    totalAlumno++;
+                    totalesColumnas[dIdx]++;
+                    granTotalMes++;
+                }
+                if (esSad) {
+                    totalSadAlumno++;
+                    granTotalSad++;
+                }
+                
+                let valorCelda = marcado ? "X" : (esSad ? "🙁" : "");
+                fila.push({ v: valorCelda, s: { ...cellStyle, alignment: { horizontal: "center" } } });
+            });
+
+            fila.push({ v: totalAlumno, s: { ...cellStyle, alignment: { horizontal: "center" }, font: { bold: true } } });
+            fila.push({ v: totalSadAlumno, s: { ...cellStyle, alignment: { horizontal: "center" }, font: { bold: true, color: { rgb: "B91C1C" } }, fill: { fgColor: { rgb: "FEE2E2" } } } });
+            dataSheet.push(fila);
+        });
+
+        let filaTotalesExcel = [
+            { v: "TOTAL ASISTENCIAS:", s: { ...headerTableStyle, alignment: { horizontal: "right" } } },
+            { v: "", s: headerTableStyle }
+        ];
+        totalesColumnas.forEach(tc => {
+            filaTotalesExcel.push({ v: tc, s: { ...headerTableStyle, alignment: { horizontal: "center" } } });
+        });
+        filaTotalesExcel.push({ v: granTotalMes, s: { ...headerTableStyle, alignment: { horizontal: "center" } } });
+        filaTotalesExcel.push({ v: granTotalSad, s: { ...headerTableStyle, alignment: { horizontal: "center" } } });
+        dataSheet.push(filaTotalesExcel);
+
+        const ws = XLSX.utils.aoa_to_sheet(dataSheet);
+
+        let wscols = [{ wch: 4 }, { wch: 32 }];
+        diasHabiles.forEach(() => wscols.push({ wch: 4.5 }));
+        wscols.push({ wch: 8 }, { wch: 8 });
+        ws['!cols'] = wscols;
+
+        let merges = [
+            { s: { r: 0, c: 0 }, e: { r: 0, c: headerRowDias.length - 1 } },
+            { s: { r: 1, c: 1 }, e: { r: 1, c: headerRowDias.length - 1 } },
+            { s: { r: 2, c: 1 }, e: { r: 2, c: headerRowDias.length - 1 } },
+            { s: { r: 3, c: 1 }, e: { r: 3, c: headerRowDias.length - 1 } },
+            { s: { r: 4, c: 1 }, e: { r: 4, c: headerRowDias.length - 1 } },
+            { s: { r: 6, c: 0 }, e: { r: 7, c: 0 } },
+            { s: { r: 6, c: 1 }, e: { r: 7, c: 1 } },
+            { s: { r: 6, c: headerRowDias.length - 2 }, e: { r: 7, c: headerRowDias.length - 2 } },
+            { s: { r: 6, c: headerRowDias.length - 1 }, e: { r: 7, c: headerRowDias.length - 1 } }
+        ];
+
+        if (diasHabiles.length > 0) {
+            merges.push({ s: { r: 6, c: 2 }, e: { r: 6, c: diasHabiles.length + 1 } });
+        }
+
+        ws['!merges'] = merges;
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, `Asistencia_${nombreMes}`);
+        XLSX.writeFile(wb, `Sistema_Asistencia_${gradoActual.replace(/ /g, "_")}_${nombreMes}.xlsx`);
+    }
+
+    renderizarConsolidado();
+</script>
+
+</body>
+</html>
