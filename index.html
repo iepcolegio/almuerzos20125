@@ -24,54 +24,31 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
+            padding: 8px;
         }
 
-        /* Contenedor general sin espacios y centrado */
         .container {
-            width: 100%;
-            max-width: 100%;
+            max-width: 1500px;
             margin: 0 auto;
             background: var(--card-bg);
-            padding: 4px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        @media (min-width: 768px) {
-            .container {
-                max-width: 1200px;
-                padding: 15px;
-                margin: 10px auto;
-            }
+            padding: 10px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
 
         h2 {
-            margin-top: 4px;
+            margin-top: 0;
             color: var(--primary-color);
             text-align: center;
-            margin-bottom: 8px;
-            font-size: 15px;
-            width: 100%;
-        }
-
-        @media (min-width: 768px) {
-            h2 { font-size: 18px; }
+            margin-bottom: 12px;
+            font-size: 18px;
         }
 
         .view-section {
             display: none;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .view-section.active {
-            display: flex;
+            display: block;
         }
 
         .header-panel {
@@ -84,8 +61,6 @@
             margin-bottom: 12px;
             align-items: center;
             border: 1px solid var(--border-color);
-            width: 100%;
-            box-sizing: border-box;
         }
 
         .header-panel div {
@@ -111,28 +86,22 @@
 
         .actions-bar {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 8px;
-            width: 100%;
-            box-sizing: border-box;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .actions-group {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             flex-wrap: wrap;
             align-items: center;
             width: 100%;
-            justify-content: center;
         }
 
         @media (min-width: 768px) {
-            .actions-bar {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
             .actions-group {
                 width: auto;
             }
@@ -142,21 +111,18 @@
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 6px 8px;
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 11px;
+            font-size: 12px;
             transition: background-color 0.2s;
             flex: 1;
-            box-sizing: border-box;
         }
 
         @media (min-width: 768px) {
             button {
                 flex: unset;
-                padding: 8px 12px;
-                font-size: 12px;
             }
         }
 
@@ -175,48 +141,61 @@
 
         .table-responsive {
             width: 100%;
-            display: flex;
-            justify-content: center;
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Tabla compacta y centrada */
-        table {
-            width: auto;
-            max-width: 100%;
+        /* Centrar la tabla del Consolidado General y hacerla compacta */
+        #vistaConsolidado .table-responsive {
+            display: flex;
+            justify-content: center;
+        }
+
+        #vistaConsolidado table {
+            width: auto !important;
             border-collapse: collapse;
-            table-layout: auto;
-            margin: 0 auto;
+            white-space: nowrap;
+        }
+
+        #vistaConsolidado th, 
+        #vistaConsolidado td {
+            width: 1% !important;
+            white-space: nowrap !important;
+            padding: 6px 12px !important;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
         }
 
         th, td {
             border: 1px solid var(--border-color);
-            padding: 5px 8px;
+            padding: 6px 4px;
             text-align: center;
-            font-size: 10px;
+            font-size: 11px;
         }
 
         @media (min-width: 768px) {
             th, td {
-                padding: 8px 12px;
+                padding: 8px 5px;
                 font-size: 11px;
             }
         }
 
-        /* Anchos ajustados y compactos */
-        .col-consolidado-num {
-            width: 35px !important;
+        .col-num {
+            width: 32px !important;
+            max-width: 32px !important;
+            min-width: 32px !important;
         }
-        .col-consolidado-grado {
-            width: 65px !important;
-        }
-        .col-consolidado-nombre {
-            width: auto !important; /* Se vuelve totalmente compacta al tamaño del nombre */
-            white-space: nowrap !important;
-            text-align: left !important;
-        }
-        .col-consolidado-accion {
-            width: 85px !important;
+
+        .col-name {
+            width: 220px !important;
+            max-width: 220px !important;
+            min-width: 220px !important;
+            white-space: normal !important;
+            word-break: break-word;
         }
 
         th {
@@ -236,16 +215,11 @@
         }
 
         .nombre-estudiante-consolidado {
-            font-size: 10px !important;
+            text-align: left !important;
+            font-size: 13px !important;
             font-weight: 700 !important;
             color: #0f172a !important;
             cursor: pointer;
-        }
-
-        @media (min-width: 768px) {
-            .nombre-estudiante-consolidado {
-                font-size: 12px !important;
-            }
         }
 
         .nombre-estudiante-consolidado:hover {
@@ -259,7 +233,17 @@
             font-weight: 600 !important;
             color: #0f172a !important;
             cursor: pointer;
-            white-space: nowrap;
+        }
+        
+        @media (min-width: 768px) {
+            .nombre-estudiante-detalle {
+                font-size: 12px !important;
+            }
+        }
+
+        .nombre-estudiante-detalle:hover {
+            background-color: #e0e7ff !important;
+            text-decoration: underline;
         }
 
         tr:nth-child(even) td:not(.col-num):not(.nombre-estudiante-consolidado):not(.nombre-estudiante-detalle) {
@@ -296,8 +280,6 @@
             flex-direction: column;
             gap: 12px;
             align-items: center;
-            width: 100%;
-            box-sizing: border-box;
         }
 
         @media (min-width: 768px) {
@@ -421,8 +403,8 @@
         
         <div class="actions-bar">
             <div class="actions-group">
-                <label for="selectGradoConsolidado" style="font-weight: bold; font-size: 11px; width: 100%; text-align: center;">Filtrar Grado:</label>
-                <select id="selectGradoConsolidado" onchange="renderizarConsolidado()" style="padding: 6px; border-radius: 6px; border: 1px solid var(--border-color); font-weight: 600; font-size: 11px; background: white; width: 100%; max-width: 250px;">
+                <label for="selectGradoConsolidado" style="font-weight: bold; font-size: 12px; width: 100%;">Filtrar Grado:</label>
+                <select id="selectGradoConsolidado" onchange="renderizarConsolidado()" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); font-weight: 600; font-size: 12px; background: white; width: 100%;">
                     <option value="TODOS">-- Todos los Grados --</option>
                     <option value="1° de Secundaria">1° de Secundaria</option>
                     <option value="2° de Secundaria">2° de Secundaria</option>
@@ -430,15 +412,13 @@
                     <option value="4° de Secundaria">4° de Secundaria</option>
                     <option value="5° de Secundaria">5° de Secundaria</option>
                 </select>
+                <button class="btn-success" onclick="abrirRegistroDesdeBotonSuperior()">📋 Ver Registro del Grado</button>
+                <button class="btn-success" onclick="exportarConsolidadoExcel()">Exportar Consolidado a Excel</button>
+                <button class="btn-warning" onclick="abrirEstadisticasGenerales()">Ver Estadísticas (Gráfico)</button>
             </div>
-            <div class="actions-group">
-                <button class="btn-success" onclick="abrirRegistroDesdeBotonSuperior()">📋 Ver Registro</button>
-                <button class="btn-success" onclick="exportarConsolidadoExcel()">Exportar Excel</button>
-                <button class="btn-warning" onclick="abrirEstadisticasGenerales()">Gráfico</button>
-            </div>
-            <div class="actions-group">
-                <button onclick="exportarJSON()">JSON</button>
-                <button onclick="document.getElementById('inputImportJson').click()">Importar</button>
+            <div class="actions-group" style="margin-top: 4px;">
+                <button onclick="exportarJSON()">Exportar (JSON)</button>
+                <button onclick="document.getElementById('inputImportJson').click()">Importar (JSON)</button>
                 <input type="file" id="inputImportJson" accept=".json" style="display: none;" onchange="importarJSON(event)">
             </div>
         </div>
@@ -469,10 +449,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th class="col-consolidado-num">N°</th>
-                        <th class="col-consolidado-grado">Grado</th>
-                        <th class="col-consolidado-nombre">Apellidos y Nombres del Estudiante</th>
-                        <th class="col-consolidado-accion">Acción Rápida</th>
+                        <th style="width: 1% !important; white-space: nowrap !important;">N°</th>
+                        <th style="width: 1% !important; white-space: nowrap !important;">Grado</th>
+                        <th style="width: 1% !important; white-space: nowrap !important;">Apellidos y Nombres del Estudiante</th>
+                        <th style="width: 1% !important; white-space: nowrap !important;">Acción Rápida</th>
                     </tr>
                 </thead>
                 <tbody id="cuerpoConsolidado">
@@ -484,7 +464,7 @@
 
     <!-- VISTA 2: REGISTRO DETALLADO POR GRADO -->
     <div id="vistaDetalle" class="view-section">
-        <div style="margin-bottom: 10px; width: 100%; max-width: 400px;">
+        <div style="margin-bottom: 10px;">
             <button onclick="volverAlConsolidado()" style="width: 100%;">⬅ Volver al Consolidado</button>
         </div>
 
@@ -679,10 +659,10 @@
             alumnos.forEach(nombre => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="col-consolidado-num" style="text-align: center;"><b>${contador++}</b></td>
-                    <td class="col-consolidado-grado" style="text-align: center;"><b>${grado.replace(' de Secundaria', '')}</b></td>
-                    <td class="col-consolidado-nombre nombre-estudiante-consolidado" onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" title="Clic para agregar carita triste hoy">${nombre}</td>
-                    <td class="col-consolidado-accion" style="text-align: center;"><button onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" class="btn-danger" style="padding: 4px 6px; font-size: 10px; width: 100%;">🙁 Triste</button></td>
+                    <td style="width: 1% !important; white-space: nowrap !important; text-align: center;"><b>${contador++}</b></td>
+                    <td style="width: 1% !important; white-space: nowrap !important; text-align: center;"><b>${grado}</b></td>
+                    <td class="nombre-estudiante-consolidado" style="width: 1% !important; white-space: nowrap !important;" onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" title="Clic para agregar carita triste hoy">${nombre}</td>
+                    <td style="width: 1% !important; white-space: nowrap !important; text-align: center;"><button onclick="marcarCaritaTristeDesdeConsolidado('${grado}', '${nombre}')" class="btn-danger" style="padding: 6px 10px; font-size: 11px; width: 100%;">🙁 Poner Triste</button></td>
                 `;
                 tbody.appendChild(tr);
             });
